@@ -56,14 +56,17 @@
                     </x-slot>
                     <x-slot name="content">
                         @can('edit users')
-                            <a href="#" class="flex w-full px-3 py-2 font-medium text-left text-gray-500 rounded-lg text-theme-xs hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">Edit</a>
+                            <button @click.prevent="$dispatch('open-edit-user-modal', { id: item.id, name: item.name, email: item.email, role: item.role }); $parent.isOpen = false" type="button" class="flex w-full px-3 py-2 font-medium text-left text-gray-500 rounded-lg text-theme-xs hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">Edit</button>
                         @endcan
                         @can('delete users')
-                            <a href="#" class="flex w-full px-3 py-2 font-medium text-left text-red-500 rounded-lg text-theme-xs hover:bg-red-50 dark:hover:bg-red-500/10">Delete</a>
+                            <button @click.prevent="$dispatch('open-delete-user-modal', { id: item.id, name: item.name }); $parent.isOpen = false" type="button" class="flex w-full px-3 py-2 font-medium text-left text-red-500 rounded-lg text-theme-xs hover:bg-red-50 dark:hover:bg-red-500/10">Delete</button>
                         @endcan
                     </x-slot>
                 </x-backend::common.table-dropdown>
             </div>
         </td>
-    </x-backend::common.data-table>
+    </x-backend::tables.data-table>
+
+    {{-- Include User Modals --}}
+    @include('backend.pages.users.modals')
 @endsection

@@ -19,6 +19,10 @@ Route::middleware('auth')->group(function () {
 
     // User Management
     Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('users.index');
+    Route::post('/users', [App\Http\Controllers\UserController::class, 'store'])->name('users.store');
+    Route::put('/users/{user}', [App\Http\Controllers\UserController::class, 'update'])->name('users.update');
+    Route::delete('/users/{user}', [App\Http\Controllers\UserController::class, 'destroy'])->name('users.destroy');
+
     Route::get('/roles', [App\Http\Controllers\RoleController::class, 'index'])->name('roles.index');
     Route::get('/permissions', [App\Http\Controllers\PermissionController::class, 'index'])->name('permissions.index');
 });
