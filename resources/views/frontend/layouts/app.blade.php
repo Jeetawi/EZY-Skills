@@ -19,7 +19,7 @@
             @include('frontend.layouts.navigation')
 
             <!-- Page Content -->
-            <main class="py-8">
+            <main>
                 @yield('content')
             </main>
 

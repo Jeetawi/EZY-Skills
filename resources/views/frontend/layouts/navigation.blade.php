@@ -51,6 +51,9 @@
                 @endguest
 
                 @auth
+                    <!-- Notification Bell -->
+                    <x-notification-bell />
+
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
                             <button class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none transition">

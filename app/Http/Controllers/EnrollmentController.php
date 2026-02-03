@@ -7,7 +7,6 @@ use App\Models\CourseEnrollment;
 use App\Notifications\EnrollmentAcceptedNotification;
 use App\Notifications\EnrollmentRejectedNotification;
 use App\Notifications\EnrollmentRequestNotification;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -47,7 +46,10 @@ class EnrollmentController extends Controller
             'enrolled_at' => now(),
         ]);
 
-        // Send notification to teacher via Reverb
+        // Load relationships
+        $enrollment->load(['course', 'student']);
+
+        // Store notification in DB And Send it to teacher via Reverb
         $course->teacher->notify(new EnrollmentRequestNotification($enrollment));
 
         return redirect()->route('courses.show', $course)

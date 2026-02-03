@@ -112,8 +112,10 @@
                     </svg>
                 </button>
 
-                <!-- Notification Dropdown -->
-                <x-header.notification-dropdown />
+                <!-- Notification Bell -->
+                @auth
+                    <x-notification-bell />
+                @endauth
             </div>
 
             <!-- User Dropdown -->
