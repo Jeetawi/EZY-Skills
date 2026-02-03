@@ -68,5 +68,7 @@
     </x-backend::tables.data-table>
 
     {{-- Include User Modals --}}
-    @include('backend.pages.users.modals')
+    @include('backend.pages.users.modals.add')
+    @include('backend.pages.users.modals.edit')
+    @include('backend.pages.users.modals.delete')
 @endsection

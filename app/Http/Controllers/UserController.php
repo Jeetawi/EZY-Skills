@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use DB;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
@@ -35,50 +36,51 @@ class UserController extends Controller
     }
 
     /**
-     * Show the form for creating a new user.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created user in storage.
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8'],
-            'role' => ['required', 'exists:roles,name'],
-        ]);
+        try {
+            $validated = $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+                'password' => ['required', 'string', 'min:8'],
+                'role' => ['required', 'exists:roles,name'],
+            ]);
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-        ]);
+            DB::beginTransaction();
 
-        $user->assignRole($validated['role']);
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+            ]);
 
-        return redirect()->route('users.index')->with('success', 'User created successfully!');
-    }
+            $user->assignRole($validated['role']);
 
-    /**
-     * Display the specified user.
-     */
-    public function show(User $user)
-    {
-        //
-    }
+            DB::commit();
 
-    /**
-     * Show the form for editing the specified user.
-     */
-    public function edit(User $user)
-    {
-        //
+            // Success flash message
+            flash()->success('User created successfully!', [
+                'timeout' => 10000,
+                'position' => 'bottom-right',
+                'closeButton' => true,
+            ]);
+
+            return redirect()->route('users.index');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Error flash message
+            flash()->error('Failed to create user: ' . $e->getMessage(), [
+                'timeout' => 10000,
+                'position' => 'bottom-right',
+                'closeButton' => true,
+            ]);
+
+            return redirect()->back()->withInput();
+        }
     }
 
     /**
@@ -86,25 +88,44 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
-            'password' => ['nullable', 'string', 'min:8'],
-            'role' => ['required', 'exists:roles,name'],
-        ]);
+        try {
+            $validated = $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
+                'password' => ['nullable', 'string', 'min:8'],
+                'role' => ['required', 'exists:roles,name'],
+            ]);
 
-        $user->update([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-        ]);
+            $user->update([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+            ]);
 
-        if (!empty($validated['password'])) {
-            $user->update(['password' => bcrypt($validated['password'])]);
+            if (!empty($validated['password'])) {
+                $user->update(['password' => bcrypt($validated['password'])]);
+            }
+
+            $user->syncRoles([$validated['role']]);
+
+            // Success flash message
+            flash()->success('User updated successfully!', [
+                'timeout' => 10000,
+                'position' => 'bottom-right',
+                'closeButton' => true,
+            ]);
+
+            return redirect()->route('users.index');
+
+        } catch (\Exception $e) {
+            // Error flash message
+            flash()->error('Failed to update user: ' . $e->getMessage(), [
+                'timeout' => 10000,
+                'position' => 'bottom-right',
+                'closeButton' => true,
+            ]);
+
+            return redirect()->back()->withInput();
         }
-
-        $user->syncRoles([$validated['role']]);
-
-        return redirect()->route('users.index')->with('success', 'User updated successfully!');
     }
 
     /**
@@ -112,8 +133,27 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        $user->delete();
+        try {
+            $user->delete();
 
-        return redirect()->route('users.index')->with('success', 'User deleted successfully!');
+            // Success flash message
+            flash()->success('User deleted successfully!', [
+                'timeout' => 10000,
+                'position' => 'bottom-right',
+                'closeButton' => true,
+            ]);
+
+            return redirect()->route('users.index');
+
+        } catch (\Exception $e) {
+            // Error flash message
+            flash()->error('Failed to delete user: ' . $e->getMessage(), [
+                'timeout' => 10000,
+                'position' => 'bottom-right',
+                'closeButton' => true,
+            ]);
+
+            return redirect()->back();
+        }
     }
 }
